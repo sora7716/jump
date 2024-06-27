@@ -6,11 +6,13 @@ using UnityEngine;
 public class Item : MonoBehaviour
 {
     Animator _anim;
+    AudioSource _audioSource;
 
     void Start()
     {
         _anim = GetComponent<Animator>();
         _anim.SetBool("IsGet", false);
+        _audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -41,6 +43,7 @@ public class Item : MonoBehaviour
         Rigidbody rb = other.GetComponent<Rigidbody>();
         rb.drag = 15;
         //Destroy(this.gameObject);
+        _audioSource.Play();//Œø‰Ê‰¹‚ğ—¬‚·
         Debug.Log(other.gameObject.name + "‚ªÚG‚µ‚½");
     }
 

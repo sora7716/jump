@@ -9,6 +9,7 @@ public class PullingJump : MonoBehaviour
     [SerializeField] float jumpSpeed = 10;
     Rigidbody rb;
     Vector3 clickPosition;
+    [SerializeField]GameObject cameraObject;
     /// <summary>
     /// ジャンプ可否フラグ
     /// </summary>
@@ -31,7 +32,21 @@ public class PullingJump : MonoBehaviour
         {
             Vector3 dragVector = clickPosition - Input.mousePosition;
             float size = dragVector.magnitude; //ベクトルの長さを得る
-            rb.velocity = dragVector.normalized * jumpSpeed;
+            float x = dragVector.normalized.x * jumpSpeed;
+            float y = dragVector.normalized.y * jumpSpeed;
+            float z = dragVector.normalized.z * jumpSpeed;
+            if (cameraObject.transform.eulerAngles.y >= 99)
+            {
+                jumpSpeed = 5;
+                rb.velocity = new Vector3(y, y, -x);
+            }
+            else
+            {
+                jumpSpeed = 10;
+                rb.velocity = new Vector3(x, y, z);
+            }
+            
+            
         }
         //Physics.gravity = new Vector3(0, -9.8f, 0);ゲーム中に重力を変更できる
     }
@@ -46,11 +61,11 @@ public class PullingJump : MonoBehaviour
         //mat.color=Color.yellow;
         //rend.material = mat;    
 
-        Vector3 normal =  collision.contacts[0].normal; //法線をとってくる
+        Vector3 normal = collision.contacts[0].normal; //法線をとってくる
         float angle = Vector3.Angle(normal, Vector3.up);
-        if(angle < groundAngleLimit)
+        if (angle < groundAngleLimit)
         {
-        isJump = true;
+            isJump = true;
         }
         Debug.Log(collision.gameObject.name + "にぶつかった");
     }

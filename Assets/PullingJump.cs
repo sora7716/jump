@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class PullingJump : MonoBehaviour
 {
@@ -10,6 +11,7 @@ public class PullingJump : MonoBehaviour
     Rigidbody rb;
     Vector3 clickPosition;
     [SerializeField]GameObject cameraObject;
+    private Vector3 initializeScale;
     /// <summary>
     /// ジャンプ可否フラグ
     /// </summary>
@@ -17,10 +19,12 @@ public class PullingJump : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+    initializeScale=transform.localScale;
     }
 
     void Update()
     {
+       transform.localScale = initializeScale;
         //ドラック開始を検出
         if (Input.GetMouseButtonDown(0))
         {

@@ -2,17 +2,20 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class Item : MonoBehaviour
 {
     Animator _anim;
     AudioSource _audioSource;
+    //[SerializeField] Image _image;
 
     void Start()
     {
         _anim = GetComponent<Animator>();
         _anim.SetBool("IsGet", false);
         _audioSource = GetComponent<AudioSource>();
+       // _image.tintColor = Color.black;
     }
 
     void Update()
@@ -35,6 +38,7 @@ public class Item : MonoBehaviour
     {
         Debug.Log("ƒAƒCƒeƒ€‚ð”jŠü‚µ‚Ü‚·");
         Destroy(this.gameObject);
+       // _image.tintColor= Color.yellow;
     }
     private void OnTriggerEnter(Collider other)
     {

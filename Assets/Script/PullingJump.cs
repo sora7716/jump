@@ -16,10 +16,17 @@ public class PullingJump : MonoBehaviour
     [SerializeField] GameObject[] images;
     int imageNumber;
     bool isUpGravity = false;
+    public GameObject effects;
     /// <summary>
     /// ジャンプ可否フラグ
     /// </summary>
     bool isJump = false;
+
+    bool isDeath = false;
+    Vector3 beginScale = Vector3.one;
+    Vector3 endScale = new Vector3(2f,2f,2f);
+    float frame = 0.0f;
+    float endFrame = 1.0f;
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -64,7 +71,7 @@ public class PullingJump : MonoBehaviour
 
         ItemCounterManager itemCounterManager = images[imageNumber].GetComponent<ItemCounterManager>();//スクリプトを持ってくる
         itemCounterManager.Alive();//itemCounterの動き
-                                   // Physics.gravity = new Vector3(0, 9.8f, 0);//ゲーム中に重力を変更できる
+        EffectUpdate();//死亡時のエフェクト
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -83,12 +90,6 @@ public class PullingJump : MonoBehaviour
         {
             isJump = true;
         }
-
-        //else if (angle > groundAngleLimit && isUpGravity)
-        //{
-        //    isJump= true;
-        //}
-        //  Debug.Log(collision.gameObject.name + "にぶつかった");
     }
 
     private void OnCollisionExit(Collision collision)
@@ -131,6 +132,7 @@ public class PullingJump : MonoBehaviour
             }
         }
 
+        //重力が反転する
         if (other.tag == "Floating")
         {
             if (isUpGravity)
@@ -145,5 +147,48 @@ public class PullingJump : MonoBehaviour
             }
         }
 
+        //プレイヤーが消える
+        if (other.tag == "Enemy")
+        {
+           isDeath = true;
+        }
+
+    }
+
+    /// <summary>
+    /// フレームの計測
+    /// </summary>
+    void Frame()
+    {
+        if (frame < endFrame)
+        {
+            frame += Time.deltaTime;
+        }
+    }
+
+    /// <summary>
+    /// 拡縮の線形補間
+    /// </summary>
+    void ScaleLarp()
+    {
+        if (isDeath)
+        {
+            Frame();
+            gameObject.transform.localScale = Vector3.Lerp(beginScale, endScale, frame);
+        }
+    }
+
+    /// <summary>
+    /// エフェクトを出す
+    /// </summary>
+    void EffectUpdate()
+    {
+        ScaleLarp();
+        if (frame >= endFrame)
+        {
+            var effect = Instantiate(effects);
+            effect.transform.position = gameObject.transform.position;
+            gameObject.SetActive(false);
+        }
     }
 }

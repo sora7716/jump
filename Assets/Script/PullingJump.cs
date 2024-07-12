@@ -15,6 +15,7 @@ public class PullingJump : MonoBehaviour
     int itemCounter = 0;
     [SerializeField] GameObject[] images;
     int imageNumber;
+    bool isUpGravity = false;
     /// <summary>
     /// ジャンプ可否フラグ
     /// </summary>
@@ -63,7 +64,7 @@ public class PullingJump : MonoBehaviour
 
         ItemCounterManager itemCounterManager = images[imageNumber].GetComponent<ItemCounterManager>();//スクリプトを持ってくる
         itemCounterManager.Alive();//itemCounterの動き
-       // Physics.gravity = new Vector3(0, 9.8f, 0);//ゲーム中に重力を変更できる
+                                   // Physics.gravity = new Vector3(0, 9.8f, 0);//ゲーム中に重力を変更できる
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -71,10 +72,22 @@ public class PullingJump : MonoBehaviour
 
         Vector3 normal = collision.contacts[0].normal; //法線をとってくる
         float angle = Vector3.Angle(normal, Vector3.up);
-        if (angle < groundAngleLimit)
+        if (!isUpGravity)
+        {
+            if (angle < groundAngleLimit)
+            {
+                isJump = true;
+            }
+        }
+        else
         {
             isJump = true;
         }
+
+        //else if (angle > groundAngleLimit && isUpGravity)
+        //{
+        //    isJump= true;
+        //}
         //  Debug.Log(collision.gameObject.name + "にぶつかった");
     }
 
@@ -88,7 +101,15 @@ public class PullingJump : MonoBehaviour
     {
         Vector3 normal = collision.contacts[0].normal; //法線をとってくる
         float angle = Vector3.Angle(normal, Vector3.up);
-        if (angle < groundAngleLimit)
+        if (!isUpGravity)
+        {
+            if (angle < groundAngleLimit)
+            {
+                isJump = true;
+            }
+
+        }
+        else
         {
             isJump = true;
         }
@@ -99,7 +120,7 @@ public class PullingJump : MonoBehaviour
     {
         if (other.tag == "Item")
         {
-           
+
             itemCounter++; // itemを拾った数を増やす
             imageNumber = itemCounter - 1; // imageのナンバーを検出
 
@@ -112,7 +133,17 @@ public class PullingJump : MonoBehaviour
 
         if (other.tag == "Floating")
         {
-            Physics.gravity = new Vector3(0, 9.8f, 0);//ゲーム中に重力を変更できる
+            if (isUpGravity)
+            {
+                Physics.gravity = new Vector3(0, -9.8f, 0);//ゲーム中に重力を変更できる
+                isUpGravity = false;
+            }
+            else
+            {
+                Physics.gravity = new Vector3(0, 9.8f, 0);//ゲーム中に重力を変更できる
+                isUpGravity = true;
+            }
         }
+
     }
 }

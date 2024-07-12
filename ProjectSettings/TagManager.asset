@@ -6,7 +6,8 @@ TagManager:
   tags:
   - ItemUI
   - Item
-  - ' Floating'
+  - Floating
+  - Obstacle
   layers:
   - Default
   - TransparentFX

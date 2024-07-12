@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MovingPlatform : MonoBehaviour
 {
-    Vector3 _initialPostion;
+    Vector3 _initialPostion = new Vector3(0, 2, 0);
     [SerializeField] float _width = 3f;
     [SerializeField] float _speedX = 2f;
 
@@ -16,7 +16,7 @@ public class MovingPlatform : MonoBehaviour
 
     void Update()
     {
-        float x = _width * Mathf.Cos(Time.time * _speedX);
+        float x = _width * Mathf.Sin(Time.time * _speedX);
         transform.position = _initialPostion + Vector3.right * x;
     }
 

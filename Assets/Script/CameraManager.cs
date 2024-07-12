@@ -9,7 +9,6 @@ public class CameraManager : MonoBehaviour
 {
     [SerializeField] GameObject mainCamera;
     Vector3 velocity;
-    float rotateSpeed = 1.0f;
     bool isLeftRotate = false;
     bool isRightRotate = false;
     Vector3 speed = Vector3.zero;

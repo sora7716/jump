@@ -8,7 +8,6 @@ public class Item : MonoBehaviour
 {
     Animator _anim;
     AudioSource _audioSource;
-    //[SerializeField] Image _image;
 
     void Start()
     {
@@ -36,7 +35,7 @@ public class Item : MonoBehaviour
     /// </summary>
     void OnGetAnimationFinished()
     {
-        Debug.Log("アイテムを破棄します");
+        //Debug.Log("アイテムを破棄します");
         Destroy(this.gameObject);
        // _image.tintColor= Color.yellow;
     }
@@ -48,13 +47,14 @@ public class Item : MonoBehaviour
         rb.drag = 15;
         //Destroy(this.gameObject);
         _audioSource.Play();//効果音を流す
-        Debug.Log(other.gameObject.name + "が接触した");
+       // Debug.Log(other.gameObject.name + "が接触した");
+
     }
 
     private void OnTriggerExit(Collider other)
     {
         Rigidbody rb = other.GetComponent<Rigidbody>();
         rb.drag = 0;
-        Debug.Log(other.gameObject.name + "が離れた");
+       // Debug.Log(other.gameObject.name + "が離れた");
     }
 }

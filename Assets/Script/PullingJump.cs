@@ -10,8 +10,11 @@ public class PullingJump : MonoBehaviour
     [SerializeField] float jumpSpeed = 10;
     Rigidbody rb;
     Vector3 clickPosition;
-    [SerializeField]GameObject cameraObject;
+    [SerializeField] GameObject cameraObject;
     private Vector3 initializeScale;
+    int itemCounter = 0;
+    [SerializeField] GameObject[] images;
+    int imageNumber;
     /// <summary>
     /// ジャンプ可否フラグ
     /// </summary>
@@ -19,12 +22,17 @@ public class PullingJump : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-    initializeScale=transform.localScale;
+        initializeScale = transform.localScale;
+        // imagesの各要素を非アクティブにする
+        foreach (var image in images)
+        {
+            image.SetActive(false);
+        }
     }
 
     void Update()
     {
-       transform.localScale = initializeScale;
+        transform.localScale = initializeScale;
         //ドラック開始を検出
         if (Input.GetMouseButtonDown(0))
         {
@@ -49,21 +57,17 @@ public class PullingJump : MonoBehaviour
                 jumpSpeed = 10;
                 rb.velocity = new Vector3(x, y, z);
             }
-            
-            
+
+
         }
-        //Physics.gravity = new Vector3(0, -9.8f, 0);ゲーム中に重力を変更できる
+
+        ItemCounterManager itemCounterManager = images[imageNumber].GetComponent<ItemCounterManager>();//スクリプトを持ってくる
+        itemCounterManager.Alive();//itemCounterの動き
+       // Physics.gravity = new Vector3(0, 9.8f, 0);//ゲーム中に重力を変更できる
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-
-        //ぶつかったら色を変える
-        //var obj=collision.gameObject;
-        //var rend = obj.GetComponent<Renderer>();
-        //var mat = rend.material;
-        //mat.color=Color.yellow;
-        //rend.material = mat;    
 
         Vector3 normal = collision.contacts[0].normal; //法線をとってくる
         float angle = Vector3.Angle(normal, Vector3.up);
@@ -71,13 +75,13 @@ public class PullingJump : MonoBehaviour
         {
             isJump = true;
         }
-        Debug.Log(collision.gameObject.name + "にぶつかった");
+        //  Debug.Log(collision.gameObject.name + "にぶつかった");
     }
 
     private void OnCollisionExit(Collision collision)
     {
         isJump = false;
-        Debug.Log(collision.gameObject.name + "と離れた");
+        // Debug.Log(collision.gameObject.name + "と離れた");
     }
 
     private void OnCollisionStay(Collision collision)
@@ -89,5 +93,26 @@ public class PullingJump : MonoBehaviour
             isJump = true;
         }
         //Debug.Log("くっついてる");
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Item")
+        {
+           
+            itemCounter++; // itemを拾った数を増やす
+            imageNumber = itemCounter - 1; // imageのナンバーを検出
+
+            // imageNumberが配列の範囲内であることを確認
+            if (imageNumber >= 0 && imageNumber < images.Length)
+            {
+                images[imageNumber].SetActive(true); // 指定したimageを表示する 
+            }
+        }
+
+        if (other.tag == "Floating")
+        {
+            Physics.gravity = new Vector3(0, 9.8f, 0);//ゲーム中に重力を変更できる
+        }
     }
 }

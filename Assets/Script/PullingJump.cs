@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Cinemachine;
 
 public class PullingJump : MonoBehaviour
 {
@@ -24,11 +25,16 @@ public class PullingJump : MonoBehaviour
 
     bool isDeath = false;
     Vector3 beginScale = Vector3.one;
-    Vector3 endScale = new Vector3(2f,2f,2f);
+    Vector3 endScale = new Vector3(2f, 2f, 2f);
     float frame = 0.0f;
     float endFrame = 1.0f;
+    [SerializeField] CinemachineVirtualCamera vCamera;
+    float cameraBegin;
+    float cameraEnd = 20f;
+    float zoom = 0.0f;
     void Start()
     {
+        cameraBegin = vCamera.m_Lens.FieldOfView;
         rb = GetComponent<Rigidbody>();
         initializeScale = transform.localScale;
         // imagesの各要素を非アクティブにする
@@ -77,10 +83,11 @@ public class PullingJump : MonoBehaviour
     private void OnCollisionEnter(Collision collision)
     {
 
-        Vector3 normal = collision.contacts[0].normal; //法線をとってくる
-        float angle = Vector3.Angle(normal, Vector3.up);
+
         if (!isUpGravity)
         {
+            Vector3 normal = collision.contacts[0].normal; //法線をとってくる
+            float angle = Vector3.Angle(normal, Vector3.up);
             if (angle < groundAngleLimit)
             {
                 isJump = true;
@@ -150,7 +157,7 @@ public class PullingJump : MonoBehaviour
         //プレイヤーが消える
         if (other.tag == "Enemy")
         {
-           isDeath = true;
+            isDeath = true;
         }
 
     }
@@ -160,7 +167,11 @@ public class PullingJump : MonoBehaviour
     /// </summary>
     void Frame()
     {
-        if (frame < endFrame)
+        if (zoom < endFrame)
+        {
+            zoom += Time.deltaTime;
+        }
+        else if (frame < endFrame&&zoom>=endFrame)
         {
             frame += Time.deltaTime;
         }
@@ -174,7 +185,9 @@ public class PullingJump : MonoBehaviour
         if (isDeath)
         {
             Frame();
-            gameObject.transform.localScale = Vector3.Lerp(beginScale, endScale, frame);
+
+            vCamera.m_Lens.FieldOfView = Mathf.Lerp(cameraBegin, cameraEnd, EaseInQuint(zoom));
+            gameObject.transform.localScale = Vector3.Lerp(beginScale, endScale, EaseInOutQuad(frame/(endFrame*2)));
         }
     }
 
@@ -191,4 +204,15 @@ public class PullingJump : MonoBehaviour
             gameObject.SetActive(false);
         }
     }
+
+    public static float EaseInQuint(float x)
+    {
+        return x * x * x * x * x;
+    }
+
+    public static float EaseInOutQuad(float x)
+    {
+        return x < 0.5f ? 2 * x * x : 1 - Mathf.Pow(-2 * x + 2, 2) / 2;
+    }
+
 }

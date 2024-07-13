@@ -2,11 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MovingPlatform : MonoBehaviour
+public class MoveCubeUp : MonoBehaviour
 {
     Vector3 _initialPostion = new Vector3(0, 2, 0);
-    [SerializeField] float _width = 3f;
-    [SerializeField] float _speedX = 2f;
+    [SerializeField] float _height = 3f;
+    [SerializeField] float _speedY = 2f;
 
     void Start()
     {
@@ -16,8 +16,8 @@ public class MovingPlatform : MonoBehaviour
 
     void Update()
     {
-        float x = _width * Mathf.Sin(Time.time * _speedX);
-        transform.position = _initialPostion + Vector3.right * x;
+        float y = _height * Mathf.Sin(Time.time * _speedY);
+        transform.position = _initialPostion + Vector3.up * y;
     }
 
     void OnCollisionEnter(Collision collision)

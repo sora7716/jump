@@ -32,8 +32,10 @@ public class PullingJump : MonoBehaviour
     float cameraBegin;
     float cameraEnd = 20f;
     float zoom = 0.0f;
+    [SerializeField] GameObject thorn;
     void Start()
     {
+        Physics.gravity = new Vector3(0f, -9.8f, 0f);
         cameraBegin = vCamera.m_Lens.FieldOfView;
         rb = GetComponent<Rigidbody>();
         initializeScale = transform.localScale;
@@ -77,6 +79,7 @@ public class PullingJump : MonoBehaviour
 
         ItemCounterManager itemCounterManager = images[imageNumber].GetComponent<ItemCounterManager>();//スクリプトを持ってくる
         itemCounterManager.Alive();//itemCounterの動き
+        SpawnThron();//棘を出す
         EffectUpdate();//死亡時のエフェクト
     }
 
@@ -126,6 +129,7 @@ public class PullingJump : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        Item itemScript=GetComponent<Item>();
         if (other.tag == "Item")
         {
 
@@ -184,8 +188,8 @@ public class PullingJump : MonoBehaviour
     {
         if (isDeath)
         {
+            Physics.gravity = new Vector3(0f, 0f, 0f);
             Frame();
-
             vCamera.m_Lens.FieldOfView = Mathf.Lerp(cameraBegin, cameraEnd, EaseInQuint(zoom));
             gameObject.transform.localScale = Vector3.Lerp(beginScale, endScale, EaseInOutQuad(frame/(endFrame*2)));
         }
@@ -205,6 +209,13 @@ public class PullingJump : MonoBehaviour
         }
     }
 
+    void SpawnThron()
+    {
+        if (itemCounter >= 1)
+        {
+            thorn.SetActive(true);
+        }
+    }
     public static float EaseInQuint(float x)
     {
         return x * x * x * x * x;

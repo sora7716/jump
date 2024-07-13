@@ -14,7 +14,7 @@ public class Item : MonoBehaviour
         _anim = GetComponent<Animator>();
         _anim.SetBool("IsGet", false);
         _audioSource = GetComponent<AudioSource>();
-       // _image.tintColor = Color.black;
+        // _image.tintColor = Color.black;
     }
 
     void Update()
@@ -37,7 +37,7 @@ public class Item : MonoBehaviour
     {
         //Debug.Log("ƒAƒCƒeƒ€‚ğ”jŠü‚µ‚Ü‚·");
         Destroy(this.gameObject);
-       // _image.tintColor= Color.yellow;
+        // _image.tintColor= Color.yellow;
     }
     private void OnTriggerEnter(Collider other)
     {
@@ -45,9 +45,9 @@ public class Item : MonoBehaviour
         _anim.SetBool("IsGet", true);
         Rigidbody rb = other.GetComponent<Rigidbody>();
         rb.drag = 15;
-        //Destroy(this.gameObject);
         _audioSource.Play();//Œø‰Ê‰¹‚ğ—¬‚·
-       // Debug.Log(other.gameObject.name + "‚ªÚG‚µ‚½");
+                            //Destroy(this.gameObject);
+                            // Debug.Log(other.gameObject.name + "‚ªÚG‚µ‚½");
 
     }
 
@@ -55,6 +55,6 @@ public class Item : MonoBehaviour
     {
         Rigidbody rb = other.GetComponent<Rigidbody>();
         rb.drag = 0;
-       // Debug.Log(other.gameObject.name + "‚ª—£‚ê‚½");
+        // Debug.Log(other.gameObject.name + "‚ª—£‚ê‚½");
     }
 }

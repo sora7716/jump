@@ -468,7 +468,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 8
   m_CollisionDetection: 0
 --- !u!135 &117586620
 SphereCollider:
@@ -577,6 +577,7 @@ MonoBehaviour:
   - {fileID: 1314911206}
   effects: {fileID: 2914336833582378949, guid: 5039b660f38a3e644a08d0f804449e12, type: 3}
   vCamera: {fileID: 340003109}
+  thorn: {fileID: 1825760483}
 --- !u!114 &117586625
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2428,6 +2429,23 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!1 &1825760483 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7133870586191184118, guid: 8b3e9242feeadf54987ca9a65285c8e1, type: 3}
+  m_PrefabInstance: {fileID: 459385208404093856}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1825760484
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1825760483}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8163545f7f16ee4ea9b6a5f45f11e0a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1927339141
 GameObject:
   m_ObjectHideFlags: 0
@@ -2574,6 +2592,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6188225275299685787, guid: 863d94113be62e8429fc5ddcc26c09a2, type: 3}
+      propertyPath: _anim
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188225275299685787, guid: 863d94113be62e8429fc5ddcc26c09a2, type: 3}
       propertyPath: _player
       value: 
       objectReference: {fileID: 117586618}
@@ -2637,7 +2659,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7133870586191184118, guid: 8b3e9242feeadf54987ca9a65285c8e1, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1825760484}
   m_SourcePrefab: {fileID: 100100000, guid: 8b3e9242feeadf54987ca9a65285c8e1, type: 3}
 --- !u!1001 &1400748173812616974
 PrefabInstance:

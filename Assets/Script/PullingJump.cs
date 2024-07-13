@@ -1,9 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Cinemachine;
+using UnityEngine.SceneManagement;
 
 public class PullingJump : MonoBehaviour
 {
@@ -11,7 +11,7 @@ public class PullingJump : MonoBehaviour
     [SerializeField] float jumpSpeed = 10;
     Rigidbody rb;
     Vector3 clickPosition;
-    [SerializeField] GameObject cameraObject;
+    [SerializeField] GameObject mainCamera;
     private Vector3 initializeScale;
     int itemCounter = 0;
     [SerializeField] GameObject[] images;
@@ -32,7 +32,9 @@ public class PullingJump : MonoBehaviour
     float cameraBegin;
     float cameraEnd = 20f;
     float zoom = 0.0f;
-    [SerializeField] GameObject thorn;
+    [SerializeField] GameObject[] thorns;
+    [SerializeField] GameObject floatingEffect;
+   public float changeDeathTime = 0f;
     void Start()
     {
         Physics.gravity = new Vector3(0f, -9.8f, 0f);
@@ -49,44 +51,56 @@ public class PullingJump : MonoBehaviour
     void Update()
     {
         transform.localScale = initializeScale;
-        //ドラック開始を検出
-        if (Input.GetMouseButtonDown(0))
+        if (vCamera.enabled)
         {
-            clickPosition = Input.mousePosition;//マウスの座標を代入                              
+            //ドラック開始を検出
+            if (Input.GetMouseButtonDown(0))
+            {
+                clickPosition = Input.mousePosition;//マウスの座標を代入                              
 
+            }
+            //ドラック中に処理
+            else if (isJump && Input.GetMouseButtonUp(0))
+            {
+                Vector3 dragVector = clickPosition - Input.mousePosition;
+                float size = dragVector.magnitude; //ベクトルの長さを得る
+                float x = dragVector.normalized.x * jumpSpeed;
+                float y = dragVector.normalized.y * jumpSpeed;
+                float z = dragVector.normalized.z * jumpSpeed;
+                if (mainCamera.transform.eulerAngles.y >= 99)
+                {
+                    jumpSpeed = 5;
+                    rb.velocity = new Vector3(y, y, -x);
+                }
+                else
+                {
+                    jumpSpeed = 10;
+                    rb.velocity = new Vector3(x, y, z);
+                }
+            }
         }
-        //ドラック中に処理
-        else if (isJump && Input.GetMouseButtonUp(0))
+        else
         {
-            Vector3 dragVector = clickPosition - Input.mousePosition;
-            float size = dragVector.magnitude; //ベクトルの長さを得る
-            float x = dragVector.normalized.x * jumpSpeed;
-            float y = dragVector.normalized.y * jumpSpeed;
-            float z = dragVector.normalized.z * jumpSpeed;
-            if (cameraObject.transform.eulerAngles.y >= 99)
-            {
-                jumpSpeed = 5;
-                rb.velocity = new Vector3(y, y, -x);
-            }
-            else
-            {
-                jumpSpeed = 10;
-                rb.velocity = new Vector3(x, y, z);
-            }
-
-
+            rb.velocity = Vector3.zero;
         }
 
         ItemCounterManager itemCounterManager = images[imageNumber].GetComponent<ItemCounterManager>();//スクリプトを持ってくる
         itemCounterManager.Alive();//itemCounterの動き
-        SpawnThron();//棘を出す
+        ChangeField();//地形を変える棘を出したり重力反転エリアを出現させたり
+
         EffectUpdate();//死亡時のエフェクト
+        if (isDeath)
+        {
+            changeDeathTime += Time.deltaTime;
+            if (changeDeathTime > 5)
+            {
+                SceneManager.LoadScene("GameOver");
+            }
+        }
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-
-
         if (!isUpGravity)
         {
             Vector3 normal = collision.contacts[0].normal; //法線をとってくる
@@ -99,6 +113,12 @@ public class PullingJump : MonoBehaviour
         else
         {
             isJump = true;
+        }
+
+        //プレイヤーが消える
+        if (collision.gameObject.tag == "Enemy")
+        {
+            isDeath = true;
         }
     }
 
@@ -129,7 +149,7 @@ public class PullingJump : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        Item itemScript=GetComponent<Item>();
+        Item itemScript = GetComponent<Item>();
         if (other.tag == "Item")
         {
 
@@ -158,12 +178,6 @@ public class PullingJump : MonoBehaviour
             }
         }
 
-        //プレイヤーが消える
-        if (other.tag == "Enemy")
-        {
-            isDeath = true;
-        }
-
     }
 
     /// <summary>
@@ -175,7 +189,7 @@ public class PullingJump : MonoBehaviour
         {
             zoom += Time.deltaTime;
         }
-        else if (frame < endFrame&&zoom>=endFrame)
+        else if (frame < endFrame && zoom >= endFrame)
         {
             frame += Time.deltaTime;
         }
@@ -191,7 +205,7 @@ public class PullingJump : MonoBehaviour
             Physics.gravity = new Vector3(0f, 0f, 0f);
             Frame();
             vCamera.m_Lens.FieldOfView = Mathf.Lerp(cameraBegin, cameraEnd, EaseInQuint(zoom));
-            gameObject.transform.localScale = Vector3.Lerp(beginScale, endScale, EaseInOutQuad(frame/(endFrame*2)));
+            gameObject.transform.localScale = Vector3.Lerp(beginScale, endScale, EaseInOutQuad(frame / (endFrame * 2)));
         }
     }
 
@@ -203,17 +217,25 @@ public class PullingJump : MonoBehaviour
         ScaleLarp();
         if (frame >= endFrame)
         {
+           Renderer renderer = gameObject.GetComponent<Renderer>();
+            if (renderer.enabled)
+            {
             var effect = Instantiate(effects);
             effect.transform.position = gameObject.transform.position;
-            gameObject.SetActive(false);
+            }
+            renderer.enabled = false;
         }
     }
 
-    void SpawnThron()
+    void ChangeField()
     {
-        if (itemCounter >= 1)
+        if (itemCounter == 1)
         {
-            thorn.SetActive(true);
+            foreach (var thorn in thorns)
+            {
+                thorn.SetActive(true);
+            }
+            floatingEffect.SetActive(true);
         }
     }
     public static float EaseInQuint(float x)

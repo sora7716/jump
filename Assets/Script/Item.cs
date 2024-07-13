@@ -43,8 +43,8 @@ public class Item : MonoBehaviour
     {
         //_anim.Play("Get");
         _anim.SetBool("IsGet", true);
-        Rigidbody rb = other.GetComponent<Rigidbody>();
-        rb.drag = 15;
+       // Rigidbody rb = other.GetComponent<Rigidbody>();
+       // rb.drag = 15;
         _audioSource.Play();//Œø‰Ê‰¹‚ğ—¬‚·
                             //Destroy(this.gameObject);
                             // Debug.Log(other.gameObject.name + "‚ªÚG‚µ‚½");
@@ -53,8 +53,8 @@ public class Item : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        Rigidbody rb = other.GetComponent<Rigidbody>();
-        rb.drag = 0;
+        //Rigidbody rb = other.GetComponent<Rigidbody>();
+       // rb.drag = 0;
         // Debug.Log(other.gameObject.name + "‚ª—£‚ê‚½");
     }
 }

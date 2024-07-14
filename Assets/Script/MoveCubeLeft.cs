@@ -7,6 +7,7 @@ public class MoveCubeLeft : MonoBehaviour
     Vector3 _initialPostion = new Vector3(0, 2, 0);
     [SerializeField] float _width = 3f;
     [SerializeField] float _speedX = 2f;
+    [SerializeField] GameObject thornManager;
 
     void Start()
     {
@@ -16,8 +17,11 @@ public class MoveCubeLeft : MonoBehaviour
 
     void Update()
     {
-        float x = _width * Mathf.Sin(Time.time * _speedX);
-        transform.position = _initialPostion + Vector3.right * x;
+        if (thornManager.activeSelf)
+        {
+            float x = _width * Mathf.Sin(Time.time * _speedX);
+            transform.position = _initialPostion + Vector3.right * x;
+        }
     }
 
     void OnCollisionEnter(Collision collision)

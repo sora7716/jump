@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using Cinemachine;
 using UnityEngine.SceneManagement;
+using System;
+using Unity.VisualScripting;
 
 public class PullingJump : MonoBehaviour
 {
@@ -33,8 +35,12 @@ public class PullingJump : MonoBehaviour
     float cameraEnd = 20f;
     float zoom = 0.0f;
     [SerializeField] GameObject[] thorns;
+    [SerializeField] GameObject[] thorns2;
+    [SerializeField] GameObject[] thorns3;
     [SerializeField] GameObject floatingEffect;
-   public float changeDeathTime = 0f;
+    public float changeDeathTime = 0f;
+    bool isGool = false;
+    float clearZoom = 0.0f;
     void Start()
     {
         Physics.gravity = new Vector3(0f, -9.8f, 0f);
@@ -51,7 +57,7 @@ public class PullingJump : MonoBehaviour
     void Update()
     {
         transform.localScale = initializeScale;
-        if (vCamera.enabled)
+        if (!isDeath||!isGool)
         {
             //ドラック開始を検出
             if (Input.GetMouseButtonDown(0))
@@ -82,6 +88,7 @@ public class PullingJump : MonoBehaviour
         else
         {
             rb.velocity = Vector3.zero;
+            Physics.gravity = new Vector3(0f, 0f, 0f);
         }
 
         ItemCounterManager itemCounterManager = images[imageNumber].GetComponent<ItemCounterManager>();//スクリプトを持ってくる
@@ -96,6 +103,11 @@ public class PullingJump : MonoBehaviour
             {
                 SceneManager.LoadScene("GameOver");
             }
+        }
+
+        if (isGool)
+        {
+            GameClear();
         }
     }
 
@@ -118,6 +130,11 @@ public class PullingJump : MonoBehaviour
         //プレイヤーが消える
         if (collision.gameObject.tag == "Enemy")
         {
+            GameObject obj = gameObject;
+            Renderer rend = obj.GetComponent<Renderer>();
+            Material mat = rend.material;
+            mat.color = Color.red;
+            rend.material = mat;
             isDeath = true;
         }
     }
@@ -161,6 +178,7 @@ public class PullingJump : MonoBehaviour
             {
                 images[imageNumber].SetActive(true); // 指定したimageを表示する 
             }
+            other.enabled = false;
         }
 
         //重力が反転する
@@ -177,7 +195,10 @@ public class PullingJump : MonoBehaviour
                 isUpGravity = true;
             }
         }
-
+        if (other.tag == "Gool")
+        {
+            isGool = true;
+        }
     }
 
     /// <summary>
@@ -202,7 +223,6 @@ public class PullingJump : MonoBehaviour
     {
         if (isDeath)
         {
-            Physics.gravity = new Vector3(0f, 0f, 0f);
             Frame();
             vCamera.m_Lens.FieldOfView = Mathf.Lerp(cameraBegin, cameraEnd, EaseInQuint(zoom));
             gameObject.transform.localScale = Vector3.Lerp(beginScale, endScale, EaseInOutQuad(frame / (endFrame * 2)));
@@ -217,11 +237,11 @@ public class PullingJump : MonoBehaviour
         ScaleLarp();
         if (frame >= endFrame)
         {
-           Renderer renderer = gameObject.GetComponent<Renderer>();
+            Renderer renderer = gameObject.GetComponent<Renderer>();
             if (renderer.enabled)
             {
-            var effect = Instantiate(effects);
-            effect.transform.position = gameObject.transform.position;
+                var effect = Instantiate(effects);
+                effect.transform.position = gameObject.transform.position;
             }
             renderer.enabled = false;
         }
@@ -237,6 +257,20 @@ public class PullingJump : MonoBehaviour
             }
             floatingEffect.SetActive(true);
         }
+        if (itemCounter == 2)
+        {
+            foreach (var thorn in thorns2)
+            {
+                thorn.SetActive(true);
+            }
+        }
+        if (itemCounter == 3)
+        {
+            foreach (var thorn in thorns3)
+            {
+                thorn.SetActive(true);
+            }
+        }
     }
     public static float EaseInQuint(float x)
     {
@@ -248,4 +282,21 @@ public class PullingJump : MonoBehaviour
         return x < 0.5f ? 2 * x * x : 1 - Mathf.Pow(-2 * x + 2, 2) / 2;
     }
 
+    void ClearZoom()
+    {
+        if (clearZoom < endFrame)
+        {
+            clearZoom += Time.deltaTime;
+        }
+        else
+        {
+            SceneManager.LoadScene("GameClear");
+        }
+    }
+
+    void GameClear()
+    {
+        ClearZoom();    
+        vCamera.m_Lens.FieldOfView = Mathf.Lerp(cameraBegin, cameraEnd, EaseInQuint(clearZoom));
+    }
 }

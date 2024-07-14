@@ -6,6 +6,7 @@ using Cinemachine;
 using UnityEngine.SceneManagement;
 using System;
 using Unity.VisualScripting;
+using UnityEngine.UI;
 
 public class PullingJump : MonoBehaviour
 {
@@ -13,7 +14,13 @@ public class PullingJump : MonoBehaviour
     [SerializeField] float jumpSpeed = 10;
     Rigidbody rb;
     Vector3 clickPosition;
-    [SerializeField] GameObject mainCamera;
+    [SerializeField] GameObject cameraObject;
+    Vector3 cameraBeginPosition;
+    [SerializeField] Vector3 cameraGoolPosition;
+    public float cameraMoveTime = 0f;
+    float returnTime = 0f;
+    public bool isVCamera = true;
+    bool isObjectFreez = false;
     private Vector3 initializeScale;
     int itemCounter = 0;
     [SerializeField] GameObject[] images;
@@ -41,6 +48,13 @@ public class PullingJump : MonoBehaviour
     public float changeDeathTime = 0f;
     bool isGool = false;
     float clearZoom = 0.0f;
+    [SerializeField] GameObject[] invisibleWalls;
+    [SerializeField] GameObject fedeImage;
+    UnityEngine.UI.Image fadeImageComponent;
+    Color fadeImageColorBegin;
+    Color fadeImageColorEnd;
+    float colorChangeTime;
+    [SerializeField] GameObject arrowImage;
     void Start()
     {
         Physics.gravity = new Vector3(0f, -9.8f, 0f);
@@ -52,12 +66,20 @@ public class PullingJump : MonoBehaviour
         {
             image.SetActive(false);
         }
+        foreach (var invisibleWall in invisibleWalls)
+        {
+            invisibleWall.SetActive(false);
+        }
+        fadeImageComponent = fedeImage.GetComponent<UnityEngine.UI.Image>();
+        fadeImageComponent.color = new Color(0f, 0f, 0f, 0f);
+        fadeImageColorBegin = fadeImageComponent.color;
+        fadeImageColorEnd = new Color(0f, 0f, 0f, 1f);
     }
 
     void Update()
     {
         transform.localScale = initializeScale;
-        if (!isDeath||!isGool)
+        if (!isDeath || !isGool)
         {
             //ドラック開始を検出
             if (Input.GetMouseButtonDown(0))
@@ -73,7 +95,7 @@ public class PullingJump : MonoBehaviour
                 float x = dragVector.normalized.x * jumpSpeed;
                 float y = dragVector.normalized.y * jumpSpeed;
                 float z = dragVector.normalized.z * jumpSpeed;
-                if (mainCamera.transform.eulerAngles.y >= 99)
+                if (cameraObject.transform.eulerAngles.y >= 99)
                 {
                     jumpSpeed = 5;
                     rb.velocity = new Vector3(y, y, -x);
@@ -84,11 +106,6 @@ public class PullingJump : MonoBehaviour
                     rb.velocity = new Vector3(x, y, z);
                 }
             }
-        }
-        else
-        {
-            rb.velocity = Vector3.zero;
-            Physics.gravity = new Vector3(0f, 0f, 0f);
         }
 
         ItemCounterManager itemCounterManager = images[imageNumber].GetComponent<ItemCounterManager>();//スクリプトを持ってくる
@@ -108,6 +125,15 @@ public class PullingJump : MonoBehaviour
         if (isGool)
         {
             GameClear();
+            rb.velocity = Vector3.zero;
+            Physics.gravity = new Vector3(0f, 0f, 0f);
+            arrowImage.SetActive(false);
+        }
+
+        ObjectFreez();
+        if (!isVCamera)
+        {
+            CameraMove();
         }
     }
 
@@ -179,6 +205,13 @@ public class PullingJump : MonoBehaviour
                 images[imageNumber].SetActive(true); // 指定したimageを表示する 
             }
             other.enabled = false;
+            if (itemCounter == 1)
+            {
+                cameraBeginPosition = cameraObject.transform.position;
+                isObjectFreez = true;
+                isVCamera = false;
+                vCamera.gameObject.SetActive(isVCamera);
+            }
         }
 
         //重力が反転する
@@ -198,6 +231,10 @@ public class PullingJump : MonoBehaviour
         if (other.tag == "Gool")
         {
             isGool = true;
+            foreach (var invisibleWall in invisibleWalls)
+            {
+                invisibleWall.SetActive(true);
+            }
         }
     }
 
@@ -255,7 +292,6 @@ public class PullingJump : MonoBehaviour
             {
                 thorn.SetActive(true);
             }
-            floatingEffect.SetActive(true);
         }
         if (itemCounter == 2)
         {
@@ -282,6 +318,11 @@ public class PullingJump : MonoBehaviour
         return x < 0.5f ? 2 * x * x : 1 - Mathf.Pow(-2 * x + 2, 2) / 2;
     }
 
+    public static float EaseOutQuint(float x)
+    {
+        return 1 - Mathf.Pow(1 - x, 5);
+    }
+
     void ClearZoom()
     {
         if (clearZoom < endFrame)
@@ -290,13 +331,64 @@ public class PullingJump : MonoBehaviour
         }
         else
         {
-            SceneManager.LoadScene("GameClear");
+            if (colorChangeTime < endFrame)
+            {
+                colorChangeTime += Time.deltaTime;
+            }
+            else
+            {
+                SceneManager.LoadScene("GameClear");
+            }
         }
     }
 
     void GameClear()
     {
-        ClearZoom();    
+        ClearZoom();
         vCamera.m_Lens.FieldOfView = Mathf.Lerp(cameraBegin, cameraEnd, EaseInQuint(clearZoom));
+        fadeImageComponent.color = Vector4.Lerp(fadeImageColorBegin, fadeImageColorEnd, EaseOutQuint(colorChangeTime));
+    }
+
+    void ObjectFreez()
+    {
+        if (isObjectFreez)
+        {
+            rb.velocity = Vector3.zero;
+            Physics.gravity = new Vector3(0f, 0f, 0f);
+            arrowImage.SetActive(false);
+        }
+    }
+    void CameraMoveTime()
+    {
+        if (cameraMoveTime < (endFrame * 3f))
+        {
+            cameraMoveTime += Time.deltaTime;
+        }
+        else
+        {
+            floatingEffect.SetActive(true);
+            if (returnTime < (endFrame * 3f))
+            {
+                returnTime += Time.deltaTime;
+            }
+            else
+            {
+                isVCamera = true;
+                vCamera.gameObject.SetActive(isVCamera);
+                isObjectFreez = false;
+                Physics.gravity = new Vector3(0f, -9.8f, 0f);
+
+            }
+        }
+
+    }
+    void CameraMove()
+    {
+        CameraMoveTime();
+        if (!isVCamera)
+        {
+            cameraObject.transform.localPosition = Vector3.Lerp(cameraBeginPosition, cameraGoolPosition, EaseInQuint(cameraMoveTime));
+        }
+
     }
 }
